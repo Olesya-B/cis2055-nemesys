@@ -1,0 +1,84 @@
+﻿.footerlinks {
+    color: #6b4836;
+    text-decoration: none !important;
+}
+
+    .footerlinks:hover {
+        color: #4d2a16;
+    }
+
+#footer1 {
+    background: #ba8667;
+}
+
+#footer2 {
+    background: #6b4836;
+}
+
+.imd {
+    margin-bottom: 2%;
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    width: 30%;
+}
+
+.imd1 {
+    margin-bottom:2%;
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    width: 10%;
+    
+}
+
+
+.sect {
+    
+    height: inherit;
+    background: #c79b7e;
+    margin-bottom:30px;
+}
+
+.collapse navbar-collapse li a{
+    color: floralwhite;
+
+}
+
+.col-12 {
+    color: #bf5d36;
+    margin-bottom: 5%;
+    width: auto;
+    height: unset;
+    font-family:'Cooper BlkHd BT';
+}
+
+.col-md-4 {
+    
+    margin-bottom: 3%;
+}
+
+.parText{
+    text-align:center;
+    
+}
+
+.policyPage{
+    display:inline-block;
+    width: 100%;
+}
+.policyImg{
+    width:30%;
+}
+
+.Img3{
+    width:80%;
+    display:flex;
+}
+
+.policyText {
+    width: 40%;
+    padding: 10px;
+    display: inline-block;
+    vertical-align: middle
+}
