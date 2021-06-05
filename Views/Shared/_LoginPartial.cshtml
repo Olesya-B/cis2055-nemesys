@@ -5,6 +5,16 @@
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
+        @if (User.IsInRole("Administrator"))
+        {
+
+            <li class="nav-item">
+                <a class="nav-link text-light" asp-action="index" asp-controller="userroles">
+                    Edit User Roles
+                </a>
+
+            </li>
+        }
         <li class="nav-item" style="align-self: center;">
             @if (UserManager.GetUserAsync(User).Result.ProfilePic != null)
             {
