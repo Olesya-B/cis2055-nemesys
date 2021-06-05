@@ -1,0 +1,40 @@
+﻿
+@model NemesysZ2.ViewModels.EditBlogPostViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<NemesysZ2.Models.ApplicationUser> UserManager
+<h2>Edit Blog Post</h2>
+
+<form asp-action="EditStatus" method="post" role="form" enctype="multipart/form-data">
+ 
+
+
+    <div class="form-group">
+        <div class="col-md-5">
+            <input type="submit" class="btn btn-primary" value="Update Blog Post" />
+            <a asp-controller="BlogPost" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Back to Post</a>
+        </div>
+    </div>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        var currentUser = await UserManager.GetUserAsync(User);
+        bool currRole = await UserManager.IsInRoleAsync(currentUser, "Administrator");
+
+
+        if (currRole == true)
+        {
+            <div class="col-md-10">
+                Open
+                @Html.RadioButtonFor(model => model.Status, "Open")
+                Closed
+                @Html.RadioButtonFor(model => model.Status, "Close")
+                Investigated
+                @Html.RadioButtonFor(model => model.Status, "Investigation");
+            </div>
+        }
+
+
+
+
+    }
+</form>

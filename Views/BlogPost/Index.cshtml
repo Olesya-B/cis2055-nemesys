@@ -1,28 +1,55 @@
 ﻿@model NemesysZ2.ViewModels.ReportsListViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Reposts";
 }
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="~/lib/Style.css" />
+<link rel="stylesheet" href="~/css/site.css" />
+    
+<h1> Reports and Dangers</h1>
 
-<h1>Index</h1>
+    <body>
+        <h1> Posting Page</h1>
+        <h2>Showing Total Posts: @Model.TotalEntries ! </h2>
+        <a asp-controller="BlogPost" asp-action="Create" class="btn btn-outline-primary">Create New Post</a>
+        <div class="row">
 
-<body>
-    <h1> Posting Page</h1>
-    <h2>Showing Total Posts: @Model.TotalEntries ! </h2>
-    <a asp-controller="BlogPost" asp-action="Create" class="btn btn-outline-primary">Create New Post</a>
-    <div class="row">
-        @foreach (var blogPost in Model.BlogPosts)
-        {
-            <div class="card" style="width: 18rem;padding:20px; margin:20px;">
-                <img class="card-img-top" src="@blogPost.ImageUrl" alt="Image for @blogPost.Title" />
-                <div class="card-body">
-                    <h3 class="card-title">@blogPost.Title</h3>
-                    <p class="small">@blogPost.CreatedDate.ToShortDateString() in @blogPost.Category.Name by @blogPost.Author.Name</p>
-                    <a asp-controller="BlogPost" asp-action="Details" asp-route-id="@blogPost.Id" class="btn btn-primary">Details</a>
+            @foreach (var blogPost in Model.BlogPosts)
+            {
+                <div class="col-sm-auto">
+                    <div class="card" style="width: 20rem;padding:20px; margin:20px; background-color:#edf2f8 ; border: solid #f9f9f9; ">
+                        <h3 class="text-md-right text-success" >@blogPost.Status</h3>
+                        @if (@blogPost.ImageUrl == null || String.IsNullOrEmpty(@blogPost.ImageUrl))
+                        {
+                            <div class="alert-info">No Image attached</div>
+
+                        }
+                        else
+                        {
+                            <img class="card-img-top" src="@blogPost.ImageUrl" alt="Image for @blogPost.Title" style="width: 70%; align-self:center;" />
+
+                        }
+
+                        <div class="card-body ">
+                            <p class="small">Posted by:  @blogPost.Author.Name in <strong> @blogPost.Category.Name </strong>  </p>
+                            <p>On: @blogPost.CreatedDate.ToShortDateString()</p>
+                          
+                            <h3 class="text-center">@blogPost.Title</h3>
+                            <p class="text-center">Location: @blogPost.Location</p>
+                            <h1>Read count: @blogPost.ReadCount</h1>
+                            <p class="text-center">Spotted on: @blogPost.DateSpotted.ToShortDateString()</p>
+
+
+                            <a asp-controller="BlogPost" asp-action="Details" asp-route-id="@blogPost.Id" class="btn btn-outline-dark">Details</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        }
-    </div>
+              
+            }
+        </div>
 
-</body>
+            
+
+    </body>
 

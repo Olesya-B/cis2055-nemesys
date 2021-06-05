@@ -34,34 +34,31 @@
                             <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Privacy">About</a>
                         </li>
                         @if (SignInManager.IsSignedIn(User))
                         {
 
                             <li class="nav-item">
                                 <a class="nav-link text-light" asp-action="index" asp-controller="Home">
-                                    Best Tips
+                                    Leader Board
                                 </a>
 
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-light" asp-action="index" asp-controller="BlogPost">
-                                    View Hazard Posts
+                                    Reports
                                 </a>
 
                             </li>
-                        }
-                        @if (SignInManager.IsSignedIn(User) && User.IsInRole("Administrator"))
-                        {
-
                             <li class="nav-item">
-                                <a class="nav-link text-light" asp-action="index" asp-controller="userroles">
-                                    Edit User Roles
+                                <a class="nav-link text-danger" asp-action="Create" asp-controller="BlogPost">
+                                    Post Report
                                 </a>
 
                             </li>
                         }
+
                     </ul>
                 </div>
             </div>

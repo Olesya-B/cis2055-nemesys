@@ -18,6 +18,7 @@ namespace NemesysZ2.Controllers
     {
         private readonly INemesysRepository _bloggyRepository;
         private readonly UserManager<ApplicationUser> _userManager;
+        
 
         public BlogPostController(INemesysRepository blogRepository, UserManager<ApplicationUser> userManager)
         {
@@ -25,6 +26,7 @@ namespace NemesysZ2.Controllers
             _userManager = userManager;
         }
 
+        [Authorize]
         public IActionResult Index()
         {
             var model = new ReportsListViewModel()
@@ -41,6 +43,8 @@ namespace NemesysZ2.Controllers
                     ImageUrl = b.ImageUrl,
                     ReadCount = b.ReadCount,
                     Title = b.Title,
+                    Status = b.Status,
+
                     Category = new CategoryViewModel()
                     {
                         Id = b.Category.Id,
@@ -49,8 +53,11 @@ namespace NemesysZ2.Controllers
                     Author = new AuthorViewModel()
                     {
                         Id = b.UserId,
+                        Email = (_userManager.FindByIdAsync(b.UserId).Result != null) ? _userManager.FindByIdAsync(b.UserId).Result.Email : "Anonymous",
                         Name = (_userManager.FindByIdAsync(b.UserId).Result != null) ? _userManager.FindByIdAsync(b.UserId).Result.UserName : "Anonymous"
-                    }
+                    },
+                    DateSpotted = b.DateSpotted,
+                    Location = b.Location
 
 
                 })
@@ -58,15 +65,18 @@ namespace NemesysZ2.Controllers
 
             return View(model);
         }
-       
 
+        [Authorize]
         public IActionResult Details(int id)
         {
+
             var post = _bloggyRepository.GetBlogPostById(id);
             if (post == null)
                 return NotFound();
             else
             {
+
+
                 var model = new ReportsViewModel()
                 {
                     Id = post.Id,
@@ -83,8 +93,12 @@ namespace NemesysZ2.Controllers
                     Author = new AuthorViewModel()
                     {
                         Id = post.UserId,
+                        Email = (_userManager.FindByIdAsync(post.UserId).Result != null) ? _userManager.FindByIdAsync(post.UserId).Result.Email : "Anonymous",
                         Name = (_userManager.FindByIdAsync(post.UserId).Result != null) ? _userManager.FindByIdAsync(post.UserId).Result.UserName : "Anonymous"
-                    }
+                    },
+                    DateSpotted = post.DateSpotted,
+                    Location = post.Location,
+
                 };
 
                 return View(model);
@@ -93,7 +107,7 @@ namespace NemesysZ2.Controllers
         }
 
         [HttpGet]
- 
+        [Authorize]
         public IActionResult Create()
         {
             //Load all categories and create a list of CategoryViewModel
@@ -114,9 +128,11 @@ namespace NemesysZ2.Controllers
         }
 
         [HttpPost]
-   
-        public IActionResult Create([Bind("Title, Content, ImageToUpload, CategoryId")] EditBlogPostViewModel newBlogPost)
+        [Authorize]
+        public IActionResult Create([Bind("Title, Content, ImageToUpload, ReadCount, CategoryId, DateSpotted, Location")] EditBlogPostViewModel newBlogPost)
         {
+
+
             if (ModelState.IsValid)
             {
                 string fileName = "";
@@ -141,7 +157,10 @@ namespace NemesysZ2.Controllers
                     ImageUrl = "/images/blogposts/" + fileName,
                     ReadCount = 0,
                     CategoryId = newBlogPost.CategoryId,
-                    UserId = _userManager.GetUserId(User)
+                    UserId = _userManager.GetUserId(User),
+                    DateSpotted = newBlogPost.DateSpotted,
+                    Location = newBlogPost.Location
+
                 };
 
                 _bloggyRepository.CreateBlogPost(blogPost);
@@ -170,16 +189,26 @@ namespace NemesysZ2.Controllers
             var existingBlogPost = _bloggyRepository.GetBlogPostById(id);
             if (existingBlogPost != null)
             {
-               var currentUser = await _userManager.GetUserAsync(User);
-                if (existingBlogPost.User.Id == currentUser.Id)
+
+                var currentUser = await _userManager.GetUserAsync(User);
+                bool currRole = await _userManager.IsInRoleAsync(currentUser, "Administrator");
+
+                if (existingBlogPost.User.Id == currentUser.Id || currRole == true)
                 {
+                    if (currRole == false)
+                    {
+                        return Unauthorized();
+                    }
                     EditBlogPostViewModel model = new EditBlogPostViewModel()
                     {
                         Id = existingBlogPost.Id,
                         Title = existingBlogPost.Title,
                         Content = existingBlogPost.Content,
                         ImageUrl = existingBlogPost.ImageUrl,
-                        CategoryId = existingBlogPost.CategoryId
+                        CategoryId = existingBlogPost.CategoryId,
+                        DateSpotted = existingBlogPost.DateSpotted,
+                        Location = existingBlogPost.Location
+
                     };
 
                     //Load all categories and create a list of CategoryViewModel
@@ -203,7 +232,7 @@ namespace NemesysZ2.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Edit([FromRoute] int id, [Bind("Id, Title, Content, ImageToUpload, CategoryId")] EditBlogPostViewModel updatedBlogPost)
+        public async Task<IActionResult> Edit([FromRoute] int id, [Bind("Id, Title, Content, ImageToUpload, CategoryId, DateSpotted, Location")] EditBlogPostViewModel updatedBlogPost)
         {
             var modelToUpdate = _bloggyRepository.GetBlogPostById(id);
             if (modelToUpdate == null)
@@ -211,9 +240,14 @@ namespace NemesysZ2.Controllers
                 return NotFound();
             }
 
+
+
+
+
             //Check if the current user has access to this resource
             var currentUser = await _userManager.GetUserAsync(User);
-            if (modelToUpdate.User.Id == currentUser.Id)
+            bool currRole = await _userManager.IsInRoleAsync(currentUser, "Administrator");
+            if (modelToUpdate.User.Id == currentUser.Id || currRole == true)
             {
                 if (ModelState.IsValid)
                 {
@@ -243,6 +277,9 @@ namespace NemesysZ2.Controllers
                     modelToUpdate.UpdatedDate = DateTime.Now;
                     modelToUpdate.CategoryId = updatedBlogPost.CategoryId;
                     modelToUpdate.UserId = _userManager.GetUserId(User);
+                    modelToUpdate.DateSpotted = updatedBlogPost.DateSpotted;
+                    modelToUpdate.Location = updatedBlogPost.Location;
+
 
                     _bloggyRepository.UpdateBlogPost(modelToUpdate);
 
@@ -267,7 +304,119 @@ namespace NemesysZ2.Controllers
             }
         }
 
+
+
+        [HttpGet]
+
+        public async Task<IActionResult> EditStatus(int id)
+        {
+            var existingBlogPost = _bloggyRepository.GetBlogPostById(id);
+            if (existingBlogPost != null)
+            {
+
+                var currentUser = await _userManager.GetUserAsync(User);
+                bool currRole = await _userManager.IsInRoleAsync(currentUser, "Administrator");
+
+                if (currRole == true)
+                {
+                    if (currRole == false)
+                    {
+                        return Unauthorized();
+                    }
+                    EditBlogPostViewModel model = new EditBlogPostViewModel()
+                    {
+                        Status = existingBlogPost.Status
+                    };
+
+                    return View(model);
+                }              
+                     
+            
+                else
+                    return Unauthorized();
+
+                //Load all categories and create a list of CategoryViewModel
+
+            }
+
+            else
+                return RedirectToAction("Index");
+            
+          
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> EditStatus([FromRoute] int id, [Bind("Id, Title, Content, ReadCount, ImageToUpload, CategoryId, DateSpotted, Location, Status")] EditBlogPostViewModel updatedBlogPost)
+        {
+            var modelToUpdate = _bloggyRepository.GetBlogPostById(id);
+            if (modelToUpdate == null)
+            {
+                return NotFound();
+            }
+
+            //Check if the current user has access to this resource
+            var currentUser = await _userManager.GetUserAsync(User);
+            bool currRole = await _userManager.IsInRoleAsync(currentUser, "Administrator");
+            if (currRole == true)
+            {
+               
+                    modelToUpdate.Status = updatedBlogPost.Status;
+                    _bloggyRepository.UpdateBlogPost(modelToUpdate);
+
+                    return RedirectToAction("Index");
+              
+            }
+            else
+                return Unauthorized();
+        }
+
+
+        //Like Button
+
+       
+
+        [HttpGet]
+        [Authorize]
+
+        public async Task<IActionResult> Likes(int id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var existingBlogPost =  _bloggyRepository.GetBlogPostById(id);
+            if (existingBlogPost != null)
+            {
+                EditBlogPostViewModel _MyVoteModel = new EditBlogPostViewModel();
+                _MyVoteModel.ReadCount++;
+
+
+            };
+               
+                return View();
+                       
+        }
+
+
+
+        [HttpGet]
+        [Authorize(Roles = "Administrator")]
+        public IActionResult Dashboard()
+        {
+
+                ViewBag.Title = "Bloggy Dashboard";
+                
+                var model = new BlogDashboardViewModel();
+                model.TotalRegisteredUsers = _userManager.Users.Count();
+                model.TotalEntries = _bloggyRepository.GetAllBlogPosts().Count();
+              
+                return View(model);
+
+        }
+
+
+
+
+
     }
-    
+
 }
 

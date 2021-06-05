@@ -5,22 +5,58 @@
 @model NemesysZ2.ViewModels.ReportsViewModel
 
 <h1>@Model.Title</h1>
-<div class="card" style="width: 90%;padding:20px; margin:20px;">
-    <img class="card-img-top" src="@Model.ImageUrl" alt="Image for @Model.Title" />
+<div class="card" style="width: 90%;padding:20px; margin:20px; ">
+    <img class="card-img-top" src="@Model.ImageUrl" alt="Image for @Model.Title" style="width: 40%; align-self:center" />
     <div class="card-body">
-        <h3 class="card-title">@Model.Title</h3>
-        <p class="card-text">@Model.Content</p>
-        <p class="small">In @Model.Category.Name</p>
-        <p class="small">@Model.CreatedDate.ToShortDateString()</p>
-        <p class="small">By @Model.Author.Name</p>
-    </div>
-</div>
 
-<a asp-controller="BlogPost" asp-action="Index" class="btn btn-primary">Back to list</a>
-@if (User.Identity.IsAuthenticated)
-{
-    if (UserManager.GetUserAsync(User).Result.Id == Model.Author.Id)
+        <h3 class="card-title">@Model.Title In <strong>@Model.Category.Name</strong></h3>
+        <div class="container">
+            <div class="row align-items-start">
+                <div class="col">
+                    Location: <strong>@Model.Location</strong>
+                </div>
+                <div class="col">
+                    By <strong>@Model.Author.Name</strong>
+                </div>
+                <div class="col">
+                    On <strong>@Model.Author.Email</strong>
+                </div>
+            </div>
+
+            <br />
+            <p class="card-subtitle">Posted On: @Model.CreatedDate.ToShortDateString() Spotted On: <strong>@Model.DateSpotted.ToShortDateString()</strong></p>
+            <br />
+            <div>
+                <hr />
+                <h5>Report information</h5>
+
+                <p class="text-info">@Model.Content</p>
+            </div>
+
+            <button id="button2" onClick="@Model.ReadCount" asp-controller="BlogPost" asp-action="Likes" asp-route-id="@Model.ReadCount" class="btn btn-primary">
+                Like
+            </button>
+
+        </div>
+    </div>
+
+    <a asp-controller="BlogPost" asp-action="Index" class="btn btn-primary">Back</a>
+    @if (User.Identity.IsAuthenticated)
     {
-        <a asp-controller="BlogPost" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Edit</a>
+        var currentUser = await UserManager.GetUserAsync(User);
+        bool currRole = await UserManager.IsInRoleAsync(currentUser, "Administrator");
+
+
+        if (UserManager.GetUserAsync(User).Result.Id == Model.Author.Id || currRole == true)
+        {
+            <a asp-controller="BlogPost" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Edit</a>
+        }
+
+        if (currRole == true)
+        {
+            <a asp-controller="BlogPost" asp-action="EditStatus" asp-route-id="@Model.Id" class="btn btn-outline-primary">EditStatus</a>
+        }
+
+
     }
-}
+
