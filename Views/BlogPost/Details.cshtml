@@ -33,30 +33,47 @@
                 <p class="text-info">@Model.Content</p>
             </div>
 
-            <button id="button2" onClick="@Model.ReadCount" asp-controller="BlogPost" asp-action="Likes" asp-route-id="@Model.ReadCount" class="btn btn-primary">
-                Like
-            </button>
+            <p class="col"> Number of Likes: @Model.NoOfLikes </p>
+
+            <form method="post" asp-controller="BlogPost" asp-action="Likes" asp-route-id="@Model.Id">
+                <button type="submit" class="btn btn-primary"> Like Post </button>
+            </form>
+
+            <div class="comments-section">
+                @{
+                    await Html.RenderPartialAsync("Comment", new CommentViewModel { PostId = Model.Id });
+                }
+                @foreach (var c in Model.Comments)
+                {
+                    <p>
+                        @c.Message --- @c.Created
+                    </p>
+                }
+            </div>
+
 
         </div>
     </div>
+</div>
 
-    <a asp-controller="BlogPost" asp-action="Index" class="btn btn-primary">Back</a>
-    @if (User.Identity.IsAuthenticated)
+
+<a asp-controller="BlogPost" asp-action="Index" class="btn btn-primary">Back</a>
+@if (User.Identity.IsAuthenticated)
+{
+    var currentUser = await UserManager.GetUserAsync(User);
+    bool currRole = await UserManager.IsInRoleAsync(currentUser, "Administrator");
+
+
+    if (UserManager.GetUserAsync(User).Result.Id == Model.Author.Id || currRole == true)
     {
-        var currentUser = await UserManager.GetUserAsync(User);
-        bool currRole = await UserManager.IsInRoleAsync(currentUser, "Administrator");
-
-
-        if (UserManager.GetUserAsync(User).Result.Id == Model.Author.Id || currRole == true)
-        {
-            <a asp-controller="BlogPost" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Edit</a>
-        }
-
-        if (currRole == true)
-        {
-            <a asp-controller="BlogPost" asp-action="EditStatus" asp-route-id="@Model.Id" class="btn btn-outline-primary">EditStatus</a>
-        }
-
-
+        <a asp-controller="BlogPost" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Edit</a>
     }
+
+    if (currRole == true)
+    {
+        <a asp-controller="BlogPost" asp-action="EditStatus" asp-route-id="@Model.Id" class="btn btn-outline-primary">EditStatus</a>
+    }
+
+
+}
 

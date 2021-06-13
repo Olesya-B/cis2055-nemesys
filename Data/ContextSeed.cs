@@ -13,7 +13,6 @@ namespace NemesysZ2.Data
         {
             await roleManager.CreateAsync(new IdentityRole("User"));
             await roleManager.CreateAsync(new IdentityRole("Administrator"));
-            
         }
 
         

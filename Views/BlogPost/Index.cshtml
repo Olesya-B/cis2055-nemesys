@@ -31,18 +31,17 @@
 
                         }
 
-                        <div class="card-body ">
-                            <p class="small">Posted by:  @blogPost.Author.Name in <strong> @blogPost.Category.Name </strong>  </p>
-                            <p>On: @blogPost.CreatedDate.ToShortDateString()</p>
-                          
-                            <h3 class="text-center">@blogPost.Title</h3>
-                            <p class="text-center">Location: @blogPost.Location</p>
-                            <h1>Read count: @blogPost.ReadCount</h1>
-                            <p class="text-center">Spotted on: @blogPost.DateSpotted.ToShortDateString()</p>
+                    <div class="card-body ">
+                        <p class="small">Posted by:  @blogPost.Author.Name in <strong> @blogPost.Category.Name </strong>  </p>
+                        <p>On: @blogPost.CreatedDate.ToShortDateString()</p>
 
+                        <h3 class="text-center">@blogPost.Title</h3>
+                        <p class="text-center">Location: @blogPost.Location</p>
+                        <h1>Number of Likes: @blogPost.NoOfLikes</h1>
+                        <p class="text-center">Spotted on: @blogPost.DateSpotted.ToShortDateString()</p>
 
-                            <a asp-controller="BlogPost" asp-action="Details" asp-route-id="@blogPost.Id" class="btn btn-outline-dark">Details</a>
-                        </div>
+                        <a asp-controller="BlogPost" asp-action="Details" asp-route-id="@blogPost.Id" class="btn btn-outline-dark">Details</a>
+                    </div>
                     </div>
                 </div>
               
